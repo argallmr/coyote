@@ -279,15 +279,15 @@ PRO cgPS_Open, filename, $
    IF N_Elements(tt_font) GT 0 THEN BEGIN
       ;TT_FONT is a font name.
       IF Size(truetype, /TNAME) EQ 'STRING' THEN BEGIN
-         font = 1
-         truetype = tt_font
+         font              = 1
+         truetype          = tt_font
          ps_struct.tt_font = tt_font
          
       ;TT_FONT is true -- find the font name.
       ENDIF ELSE IF Keyword_Set(truetype) THEN BEGIN
          IF N_Elements(set_font) EQ 0 THEN cgWindow_GetDefs, PS_TT_FONT=set_font
-         font = 1
-         truetype = set_font
+         font              = 1
+         truetype          = set_font
          ps_struct.tt_font = truetype
             
       ;TT_FONT is false -- use SET_FONT if so desired.
