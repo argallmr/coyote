@@ -204,8 +204,6 @@
 ;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
 ;    xlog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
-;    xtickformat: in, optional, type=string, default=''
-;       This keyword is trapped, but unused. Please use the `Format` keyword instead.
 ;    xtickinterval: in, optional, type=float
 ;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
 ;    xticklayout: in, optional, type=integer, default=0
@@ -214,8 +212,6 @@
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    ylog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
-;    ytickformat: in, optional, type=string, default=''
-;       This keyword is trapped, but unused. Please use the `Format` keyword instead.
 ;    ytickinterval: in, optional, type=float
 ;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
 ;    yticklayout: in, optional, type=integer, default=0
@@ -304,10 +300,11 @@
 ;           program code. 8 August 2013. DWF.
 ;       The check for a valid position is now done before the colorbar is drawn so that
 ;           a colorbar sans axes is not left dangling on the display. 25 September 2013. Matthew Argall
-;       Added [XY]TICKFORMAT to the keyword list so that they can be ignored. 17 June 2014. Matthew Argall
+;       The TextThick keyword value was not being applied correctly when the text was written on the right
+;           of a vertical colorbar or at the top of a horizontal colorbar. 27 March 2015. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorbar, $
     ADDCMD=addcmd, $
@@ -349,12 +346,10 @@ PRO cgColorbar, $
     TOP=top, $
     VERTICAL=vertical, $
     XLOG=xlog, $
-    XTICKFORMAT=xtickformat, $
     XTICKINTERVAL=xtickinterval, $
     XTICKLAYOUT=xticklayout, $
     XTITLE=xtitle, $ ; Ignored.
     YLOG=ylog, $
-    YTICKFORMAT=ytickformat, $
     YTICKINTERVAL=ytickinterval, $
     YTICKLAYOUT=yticklayout, $
     YTITLE=ytitle, $ ; Ignored
@@ -418,11 +413,9 @@ PRO cgColorbar, $
             TOP=top, $
             VERTICAL=vertical, $
             XLOG=xlog, $
-            XTICKFORMAT=xtickformat, $
             XTICKINTERVAL=xtickinterval, $
             XTITLE=xtitle, $ ; Ignored.
             YLOG=ylog, $
-            YTICKFORMAT=ytickformat, $
             YTICKINTERVAL=ytickinterval, $
             YTICKLAYOUT=yticklayout, $
             YTITLE=ytitle, $
@@ -513,13 +506,11 @@ PRO cgColorbar, $
        IF (N_Elements(yTickInterval) NE 0) && (ylog EQ 0) THEN BEGIN
            IF N_Elements(tickInterval) EQ 0 THEN tickInterval = yTickInterval
        ENDIF
-       IF (N_Elements(yTickFormat) NE 0) THEN format = yTickFormat
     ENDIF ELSE BEGIN
        IF (N_Elements(tlocation) EQ 0) THEN tlocation = Keyword_Set(top) ? 'TOP' : 'BOTTOM'
        IF (N_Elements(xTickInterval) NE 0) && (xlog EQ 0) THEN BEGIN
            IF N_Elements(tickInterval) EQ 0 THEN tickInterval = xTickInterval    
        ENDIF
-       IF (N_Elements(xTickFormat) NE 0) THEN format = xTickFormat
     ENDELSE
     
     ; A plot command limitation restricts the number of divisions to 59.
@@ -723,7 +714,8 @@ PRO cgColorbar, $
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout, $
+                 CHARTHICK=textThick
           ENDELSE
 
        ENDIF ELSE BEGIN
@@ -778,7 +770,7 @@ PRO cgColorbar, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", _STRICT_EXTRA=extra, XMINOR=minor, $
              XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval, $
-             XTICKLAYOUT=xticklayout
+             XTICKLAYOUT=xticklayout, CHARTHICK=textThick
              
           IF title NE "" THEN BEGIN
              xloc = (position[2] - position[0]) / 2.0 + position[0]
